@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="12;url=http://example.invalid/security-check">
+    <title>紧急账户安全验证</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: #eef1f5;
+            color: #202938;
+        }
+        .panel {
+            max-width: 640px;
+            margin: 48px auto;
+            padding: 28px;
+            background: #fff;
+            border: 1px solid #d7dde8;
+            border-radius: 8px;
+        }
+        .alert {
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            background: #fff0f0;
+            border-left: 4px solid #d22f27;
+            color: #8a1f18;
+            font-weight: 700;
+        }
+        label {
+            display: block;
+            margin-top: 14px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: 6px;
+            padding: 10px 12px;
+            border: 1px solid #c8d0dc;
+            border-radius: 6px;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 6px;
+            background: #b42318;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        iframe {
+            width: 1px;
+            height: 1px;
+            border: 0;
+            position: absolute;
+            left: -9999px;
+        }
+    </style>
+</head>
+<body>
+    <main class="panel">
+        <div class="alert">检测到异常登录，请立即完成账户验证。</div>
+        <h1>账户安全验证中心</h1>
+        <p>本页面仅用于本地高风险识别测试，不会真实保存或提交任何信息。</p>
+
+        <form id="verifyForm" action="#" method="post">
+            <label for="email">登录邮箱</label>
+            <input id="email" name="email" type="email" placeholder="user@example.com">
+
+            <label for="password">账户密码</label>
+            <input id="password" name="password" type="password" placeholder="请输入账户密码">
+
+            <label for="card">银行卡号</label>
+            <input id="card" name="credit_card" type="text" placeholder="0000 0000 0000 0000">
+
+            <label for="cvv">CVV 安全码</label>
+            <input id="cvv" name="cvv" type="text" placeholder="123">
+
+            <button type="submit">立即验证账户</button>
+        </form>
+    </main>
+
+    <iframe src="about:blank" title="hidden-frame"></iframe>
+
+    <script>
+        window.addEventListener("load", function () {
+            alert("安全提醒：请尽快完成账户验证。");
+        });
+
+        document.getElementById("verifyForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            alert("本页面仅用于本地测试，信息不会被提交。");
+        });
+    </script>
+</body>
+</html>
