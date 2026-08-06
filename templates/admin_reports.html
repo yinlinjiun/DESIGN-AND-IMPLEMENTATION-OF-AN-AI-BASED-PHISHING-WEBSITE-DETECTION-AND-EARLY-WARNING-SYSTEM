@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}举报管理{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1 class="section-title">举报审核管理</h1>
+    {% if reports %}
+    <div class="stack">
+        {% for report in reports %}
+        <div class="card" style="padding:20px; border:1px solid #e5e7eb; box-shadow:none;">
+            <div class="actions" style="justify-content:space-between; align-items:flex-start;">
+                <div class="stack small" style="gap:8px;">
+                    <div><strong>举报编号：</strong>#{{ report['id'] }}</div>
+                    <div><strong>提交用户：</strong>{{ report['username'] }}</div>
+                    <div><strong>举报网址：</strong><span class="mono">{{ report['reported_url'] }}</span></div>
+                    <div><strong>举报说明：</strong>{{ report['description'] }}</div>
+                    <div><strong>联系方式：</strong>{{ report['contact'] or '未填写' }}</div>
+                    <div><strong>AI 结论：</strong>{{ '疑似钓鱼网站' if report['ai_is_phishing'] else '正常网站' }}</div>
+                    <div><strong>AI 风险等级：</strong>{{ report['ai_risk_level'] }}</div>
+                    <div><strong>AI 概率：</strong>{{ '%.2f%%'|format(report['ai_probability'] * 100) }}</div>
+                    <div><strong>风险因素：</strong><div class="muted" style="white-space:pre-line;">{{ report['ai_risk_factors'] }}</div></div>
+                    <div><strong>当前状态：</strong><span class="badge status">{{ report['status'] }}</span></div>
+                    <div><strong>提交时间：</strong>{{ report['created_at'] }}</div>
+                    <div><strong>审核时间：</strong>{{ report['reviewed_at'] or '未审核' }}</div>
+                </div>
+            </div>
+
+            <form method="post" action="{{ url_for('review_report', report_id=report['id']) }}" style="margin-top:16px;">
+                <div>
+                    <label for="status-{{ report['id'] }}">审核状态</label>
+                    <select id="status-{{ report['id'] }}" name="status">
+                        <option value="待处理" {% if report['status'] == '待处理' %}selected{% endif %}>待处理</option>
+                        <option value="已确认钓鱼" {% if report['status'] == '已确认钓鱼' %}selected{% endif %}>已确认钓鱼</option>
+                        <option value="误报" {% if report['status'] == '误报' %}selected{% endif %}>误报</option>
+                        <option value="已处置" {% if report['status'] == '已处置' %}selected{% endif %}>已处置</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="review-note-{{ report['id'] }}">审核备注</label>
+                    <textarea id="review-note-{{ report['id'] }}" name="review_note">{{ report['review_note'] or '' }}</textarea>
+                </div>
+                <button type="submit">保存审核结果</button>
+            </form>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="muted">当前没有举报记录。</div>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}用户注册{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+    <section class="card">
+        <h1 class="section-title">创建账号</h1>
+        <form method="post">
+            <div>
+                <label for="username">用户名</label>
+                <input id="username" name="username" type="text" required>
+            </div>
+            <div>
+                <label for="password">密码</label>
+                <input id="password" name="password" type="password" required>
+            </div>
+            <div>
+                <label for="confirm_password">确认密码</label>
+                <input id="confirm_password" name="confirm_password" type="password" required>
+            </div>
+            <button type="submit">注册</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">注册说明</h2>
+        <div class="stack muted">
+            <div>用户名至少 3 个字符。</div>
+            <div>密码至少 6 位。</div>
+            <div>注册成功后即可登录并使用举报功能。</div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}我的举报{% endblock %}
+
+{% block content %}
+<section class="card">
+    <h1 class="section-title">我的举报记录</h1>
+    {% if reports %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>举报网址</th>
+                <th>状态</th>
+                <th>AI 风险等级</th>
+                <th>AI 概率</th>
+                <th>举报时间</th>
+                <th>审核说明</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+            <tr>
+                <td>#{{ report['id'] }}</td>
+                <td>
+                    <div class="mono">{{ report['reported_url'] }}</div>
+                    <div class="muted small">{{ report['description'] }}</div>
+                </td>
+                <td><span class="badge status">{{ report['status'] }}</span></td>
+                <td>
+                    <span class="badge {% if report['ai_risk_level'] == '高风险' %}high{% elif report['ai_risk_level'] == '中风险' %}medium{% else %}low{% endif %}">
+                        {{ report['ai_risk_level'] }}
+                    </span>
+                </td>
+                <td>{{ '%.2f%%'|format(report['ai_probability'] * 100) }}</td>
+                <td>{{ report['created_at'] }}</td>
+                <td>{{ report['review_note'] or '暂无' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="muted">你还没有提交过举报。</div>
+    {% endif %}
+</section>
+{% endblock %}

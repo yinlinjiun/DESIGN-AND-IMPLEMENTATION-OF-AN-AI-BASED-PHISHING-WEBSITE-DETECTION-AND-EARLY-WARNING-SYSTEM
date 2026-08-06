@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}举报网站{% endblock %}
+
+{% block content %}
+<div class="grid grid-2">
+    <section class="card">
+        <h1 class="section-title">提交钓鱼网站举报</h1>
+        <p class="muted">提交举报时，系统会自动对目标网址执行一次 AI 检测，并将风险结果随举报一起保存。</p>
+        <form method="post">
+            <div>
+                <label for="reported_url">举报网址</label>
+                <input id="reported_url" name="reported_url" type="text" value="{{ preset_url }}" required>
+            </div>
+            <div>
+                <label for="description">举报说明</label>
+                <textarea id="description" name="description" placeholder="请描述页面行为、仿冒对象、收集信息类型等" required></textarea>
+            </div>
+            <div>
+                <label for="contact">联系方式</label>
+                <input id="contact" name="contact" type="text" placeholder="可填写邮箱或手机号，便于后续联系">
+            </div>
+            <button type="submit">提交举报</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">举报建议</h2>
+        <div class="stack muted">
+            <div>优先填写完整网址，便于系统自动提取网页特征。</div>
+            <div>建议描述是否仿冒银行、电商、社交平台或校园系统。</div>
+            <div>如果页面涉及账号密码、银行卡、验证码等采集行为，请在说明中写明。</div>
+        </div>
+
+        {% if detection_result %}
+        <div style="margin-top:20px; padding-top:20px; border-top:1px solid #e5e7eb;">
+            <h3>本次自动检测结果</h3>
+            <div class="stack small">
+                <div><strong>网址：</strong><span class="mono">{{ detection_result['url'] }}</span></div>
+                <div><strong>风险等级：</strong>{{ detection_result['risk_level'] }}</div>
+                <div><strong>检测概率：</strong>{{ '%.2f%%'|format(detection_result['probability'] * 100) }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}后台首页{% endblock %}
+
+{% block content %}
+<section class="grid grid-4" style="margin-bottom:24px;">
+    <div class="card"><h2 class="section-title">普通用户</h2><div style="font-size:32px;font-weight:700;">{{ stats['user_count'] }}</div></div>
+    <div class="card"><h2 class="section-title">举报总数</h2><div style="font-size:32px;font-weight:700;">{{ stats['report_count'] }}</div></div>
+    <div class="card"><h2 class="section-title">待处理举报</h2><div style="font-size:32px;font-weight:700;">{{ stats['pending_report_count'] }}</div></div>
+    <div class="card"><h2 class="section-title">检测记录</h2><div style="font-size:32px;font-weight:700;">{{ stats['detection_count'] }}</div></div>
+</section>
+
+<div class="grid grid-2">
+    <section class="card">
+        <h1 class="section-title">最新举报</h1>
+        {% if latest_reports %}
+        <table>
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>网址</th>
+                    <th>状态</th>
+                    <th>AI 风险</th>
+                    <th>时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in latest_reports %}
+                <tr>
+                    <td>{{ item['username'] }}</td>
+                    <td class="mono">{{ item['reported_url'] }}</td>
+                    <td>{{ item['status'] }}</td>
+                    <td>{{ item['ai_risk_level'] }}</td>
+                    <td>{{ item['created_at'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="muted">暂无举报数据。</div>
+        {% endif %}
+    </section>
+
+    <section class="card">
+        <h1 class="section-title">最新检测记录</h1>
+        {% if latest_detections %}
+        <table>
+            <thead>
+                <tr>
+                    <th>用户</th>
+                    <th>网址</th>
+                    <th>风险等级</th>
+                    <th>概率</th>
+                    <th>时间</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in latest_detections %}
+                <tr>
+                    <td>{{ item['username'] or '游客' }}</td>
+                    <td class="mono">{{ item['url'] }}</td>
+                    <td>{{ item['risk_level'] }}</td>
+                    <td>{{ '%.2f%%'|format(item['probability'] * 100) }}</td>
+                    <td>{{ item['created_at'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="muted">暂无检测数据。</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}用户登录{% endblock %}
+
+{% block content %}
+<div>
+    <section class="card">
+        <h1 class="section-title">用户登录</h1>
+        <p class="muted">登录后可以提交举报、查看我的举报记录，并自动关联检测历史。</p>
+        <form method="post">
+            <div>
+                <label for="username">用户名</label>
+                <input id="username" name="username" type="text" required>
+            </div>
+            <div>
+                <label for="password">密码</label>
+                <input id="password" name="password" type="password" required>
+            </div>
+            <button type="submit">登录</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

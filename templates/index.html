@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+
+{% block title %}首页检测{% endblock %}
+
+{% block head %}
+<style>
+    .hero {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+    .hero-banner {
+        background: linear-gradient(135deg, #312e81 0%, #4338ca 45%, #7c3aed 100%);
+        color: white;
+        border-radius: 24px;
+        padding: 28px;
+        box-shadow: 0 20px 50px rgba(67, 56, 202, 0.28);
+    }
+    .hero-banner h1 {
+        margin: 0 0 12px;
+        font-size: 34px;
+    }
+    .hero-banner p {
+        margin: 0;
+        max-width: 760px;
+        line-height: 1.7;
+        color: rgba(255,255,255,0.9);
+    }
+    .loading { display: none; margin-top: 10px; color: #4338ca; font-weight: 600; }
+    .loading.show { display: block; }
+    .probability-bar {
+        width: 100%;
+        height: 28px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .probability-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e 0%, #f59e0b 55%, #ef4444 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-weight: 700;
+        transition: width 0.3s ease;
+    }
+    .result-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 14px;
+    }
+    .feature-item,
+    .factor-item {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 14px;
+        border: 1px solid #e5e7eb;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-banner">
+        <h1>AI钓鱼网站识别与预警平台</h1>
+        <p>系统支持 URL 语义分析、网页内容分析、风险因素解释、用户举报和管理员审核，适合作为“检测 + 预警 + 管理”一体化毕业设计系统。</p>
+    </div>
+</section>
+
+<section class="card">
+    <h2 class="section-title">网站检测</h2>
+    <form onsubmit="event.preventDefault(); detectPhishing();">
+        <div>
+            <label for="url-input">请输入待检测网址</label>
+            <input type="text" id="url-input" placeholder="例如: https://www.example.com">
+        </div>
+        <div class="actions">
+            <button type="submit">开始检测</button>
+            {% if current_user %}
+            <a class="btn btn-secondary" id="report-link" href="{{ url_for('report_site') }}">转到举报页</a>
+            {% endif %}
+        </div>
+    </form>
+    <div class="loading" id="loading">正在提取特征并进行模型判定，请稍候...</div>
+</section>
+
+<section class="card stack" id="result-card" style="display:none;">
+    <div>
+        <h2 class="section-title">检测结果</h2>
+        <div class="muted mono" id="result-url">-</div>
+    </div>
+    <div class="actions">
+        <div id="result-text" style="font-size:20px;font-weight:700;">-</div>
+        <span class="badge status" id="risk-level">-</span>
+    </div>
+    <div class="probability-bar">
+        <div class="probability-fill" id="probability-fill" style="width:0%;">
+            <span id="probability-text">0%</span>
+        </div>
+    </div>
+
+    <div>
+        <h3>风险因素</h3>
+        <div class="result-grid" id="risk-factors-list"></div>
+    </div>
+
+    <div>
+        <h3>提取特征</h3>
+        <div class="result-grid" id="features-grid"></div>
+    </div>
+</section>
+
+{% if current_user %}
+<section class="card" style="margin-top:24px;">
+    <h2 class="section-title">最近检测记录</h2>
+    {% if recent_detections %}
+    <table>
+        <thead>
+            <tr>
+                <th>网址</th>
+                <th>风险等级</th>
+                <th>检测概率</th>
+                <th>时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in recent_detections %}
+            <tr>
+                <td class="mono">{{ item['url'] }}</td>
+                <td>
+                    <span class="badge {% if item['risk_level'] == '高风险' %}high{% elif item['risk_level'] == '中风险' %}medium{% else %}low{% endif %}">
+                        {{ item['risk_level'] }}
+                    </span>
+                </td>
+                <td>{{ '%.2f%%'|format(item['probability'] * 100) }}</td>
+                <td>{{ item['created_at'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="muted">你还没有检测记录。</div>
+    {% endif %}
+</section>
+{% endif %}
+
+<section class="card" style="margin-top:24px;">
+    <h2 class="section-title">系统说明</h2>
+    <div class="stack muted">
+        <div>系统支持网站检测、风险因素解释、用户举报和管理员审核，适合作为检测预警一体化毕设系统展示。</div>
+        <div>检测结果会自动记录。登录用户的检测记录会与账号关联，便于后续举报与管理。</div>
+        <div>举报功能会自动触发一次 AI 检测，并把风险等级与风险因素一并提交到后台处理。</div>
+    </div>
+</section>
+
+<script>
+    async function detectPhishing() {
+        const urlInput = document.getElementById('url-input');
+        const url = urlInput.value.trim();
+
+        if (!url) {
+            alert('请输入要检测的URL');
+            return;
+        }
+
+        document.getElementById('loading').classList.add('show');
+
+        try {
+            const response = await fetch('/api/detect', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
+            });
+            const data = await response.json();
+            document.getElementById('loading').classList.remove('show');
+
+            if (!data.success) {
+                alert('检测失败: ' + (data.error || '未知错误'));
+                return;
+            }
+
+            displayResult(data);
+        } catch (error) {
+            document.getElementById('loading').classList.remove('show');
+            alert('检测失败: ' + error.message);
+        }
+    }
+
+    function displayResult(data) {
+        document.getElementById('result-card').style.display = 'grid';
+        document.getElementById('result-url').textContent = data.url;
+        document.getElementById('result-text').textContent = data.is_phishing ? '疑似钓鱼网站' : '正常网站';
+        document.getElementById('risk-level').textContent = data.risk_level;
+
+        const probability = (data.probability * 100).toFixed(2);
+        document.getElementById('probability-fill').style.width = probability + '%';
+        document.getElementById('probability-text').textContent = probability + '%';
+
+        const factorsContainer = document.getElementById('risk-factors-list');
+        factorsContainer.innerHTML = '';
+        data.risk_factors.forEach(function (factor) {
+            const div = document.createElement('div');
+            div.className = 'factor-item';
+            div.textContent = factor;
+            factorsContainer.appendChild(div);
+        });
+
+        const featuresGrid = document.getElementById('features-grid');
+        featuresGrid.innerHTML = '';
+        Object.entries(data.features).forEach(function ([key, value]) {
+            const div = document.createElement('div');
+            div.className = 'feature-item';
+            div.innerHTML = '<strong>' + key + '</strong><div class="muted small mono">' + value + '</div>';
+            featuresGrid.appendChild(div);
+        });
+
+        const reportLink = document.getElementById('report-link');
+        if (reportLink) {
+            reportLink.href = '/report?url=' + encodeURIComponent(data.url);
+        }
+    }
+
+    document.getElementById('url-input').addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            detectPhishing();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}钓鱼网站识别与预警系统{% endblock %}</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #eef2ff 0%, #f8fafc 100%);
+            color: #1f2937;
+        }
+        a { color: inherit; text-decoration: none; }
+        .page {
+            min-height: 100vh;
+        }
+        .nav {
+            background: #111827;
+            color: #f9fafb;
+            padding: 14px 0;
+            box-shadow: 0 8px 24px rgba(17, 24, 39, 0.18);
+        }
+        .nav-inner,
+        .content {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+        }
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .brand {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .nav-link {
+            padding: 8px 12px;
+            border-radius: 10px;
+            color: #d1d5db;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-user {
+            padding: 8px 12px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+        }
+        .btn,
+        button {
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: #fff;
+            padding: 12px 18px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+        }
+        .content {
+            padding: 24px 0 40px;
+        }
+        .flash-list {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 14px 16px;
+            border-radius: 12px;
+            background: #fff;
+            border-left: 5px solid #6366f1;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        }
+        .flash.success { border-left-color: #16a34a; }
+        .flash.warning { border-left-color: #d97706; }
+        .flash.danger { border-left-color: #dc2626; }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 16px 40px rgba(15, 23, 42, 0.10);
+            padding: 24px;
+        }
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+        .grid-4 {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+        .section-title {
+            margin: 0 0 16px;
+            font-size: 24px;
+        }
+        .muted {
+            color: #6b7280;
+        }
+        form {
+            display: grid;
+            gap: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid #d1d5db;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+        }
+        textarea { min-height: 120px; resize: vertical; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            vertical-align: top;
+        }
+        th { color: #374151; font-size: 14px; }
+        .badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge.high { background: #fee2e2; color: #b91c1c; }
+        .badge.medium { background: #fef3c7; color: #b45309; }
+        .badge.low { background: #dcfce7; color: #15803d; }
+        .badge.status { background: #e0e7ff; color: #3730a3; }
+        .stack { display: grid; gap: 16px; }
+        .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .small { font-size: 13px; }
+        .mono { word-break: break-all; }
+        @media (max-width: 768px) {
+            .nav-inner { align-items: flex-start; flex-direction: column; }
+            .content { width: min(100% - 20px, 1180px); }
+            .card { padding: 18px; }
+            th, td { font-size: 13px; padding: 10px; }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <div class="page">
+        <nav class="nav">
+            <div class="nav-inner">
+                <a class="brand" href="{{ url_for('index') }}">基于AI的钓鱼网站识别与预警系统</a>
+                <div class="nav-links">
+                    <a class="nav-link" href="{{ url_for('index') }}">首页检测</a>
+                    {% if current_user %}
+                    <a class="nav-link" href="{{ url_for('report_site') }}">举报网站</a>
+                    <a class="nav-link" href="{{ url_for('my_reports') }}">我的举报</a>
+                    {% if current_user['role'] == 'admin' %}
+                    <a class="nav-link" href="{{ url_for('admin_dashboard') }}">后台首页</a>
+                    <a class="nav-link" href="{{ url_for('admin_reports') }}">举报管理</a>
+                    {% endif %}
+                    <span class="nav-user">当前用户：{{ current_user['username'] }}{% if current_user['role'] == 'admin' %}（管理员）{% endif %}</span>
+                    <form method="post" action="{{ url_for('logout') }}" style="display:inline;">
+                        <button type="submit" class="btn-danger">退出登录</button>
+                    </form>
+                    {% else %}
+                    <a class="nav-link" href="{{ url_for('login') }}">登录</a>
+                    <a class="nav-link" href="{{ url_for('register') }}">注册</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-list">
+                    {% for category, message in messages %}
+                    <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
